@@ -118,7 +118,7 @@
     Link copied!
 </div>
 </section>
-  <section class="text-center" style="margin-top:10px;">
+  <section class="text-center" style="margin-top:400px;">
              <h1 class="business-name">Browse Cars for Sale</h1>
         <div class="container">
             <div class="grid-for-car-cards">
@@ -127,7 +127,7 @@
                         <div class="my-3">
                             <a href="{{ route('advert_detail', ['slug' => $car_data['slug']]) }}"
                                 class="text-decoration-none text-dark">
-                                <div class="main_car_card">
+                                <div class="main_car_card " style="border-radius: 20px;">
                                     <div>
                                         <div class="car_card_main_img">
                                             <div class="car_card_inner_img">
@@ -141,37 +141,37 @@
                                         </div>
                                     </div>
                                     <div class="p-3">
-                                        <p class="car_tittle text-truncate">{{ e($car_data['make'] ?? 'Unknown make') }}
+                                        <p class="car_tittle text-truncate" style="font-size: 24px; font-weight: 500; line-height: 1.2;">{{ e($car_data['make'] ?? 'Unknown make') }}
                                             {{ e($car_data['model'] ?? 'N/A') }} {{ e($car_data['year'] ?? 'N/A') }}</p>
-                                        <p class="car_varient text-truncate">
+                                        <p class="car_varient" style="font-size: 16px; font-weight: 400; line-height: 1.6;">
                                             @if (empty($car_data['Trim']) || $car_data['Trim'] == 'N/A')
                                                          {{ strtoupper($car_data['variant']) }}
                                             @else
                                                  {{ strtoupper(e($car_data['Trim'])) }}
                                             @endif
                                         </p>
-                                        <div class="car_detail">
-                                            <div class="text-center">
-                                                <div class="car_detail_type">
+                                        <div class="car_detail" style="border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding-top: 10px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                            <div class="" >
+                                                <div class="">
                                                     <!-- <img src="{{ asset('assets/icons/speed.svg') }}" alt="Mileage Icon"
                                                         width="16" height="16"> -->
-                                                    <p class="car_detail_type_text">
+                                                    <p class="" style="margin-top: 1rem;">
                                                         {{ e(isset($car_data['miles']) ? number_format($car_data['miles'], 0, '.', ',') : 'N/A') }}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div class="text-center">
-                                                <div class="car_detail_type">
+                                            <div class="">
+                                                <div class="">
                                                     <!-- <img src="{{ asset('assets/icons/fuel.svg') }}" alt="Fuel Type Icon"
                                                         width="16" height="16"> -->
-                                                    <p class="car_detail_type_text">{{ e($car_data['fuel_type'] ?? 'N/A') }}</p>
+                                                    <p class="" style="margin-top: 1rem;">{{ e($car_data['fuel_type'] ?? 'N/A') }}</p>
                                                 </div>
                                             </div>
                                             <div class="text-center">
-                                                <div class="car_detail_type">
+                                                <div class="">
                                                     <!-- <img src="{{ asset('assets/icons/gear.svg') }}"
                                                         alt="Transmission Icon" width="16" height="16"> -->
-                                                    <p class="car_detail_type_text">{{ e($car_data['gear_box'] ?? 'N/A') }}</p>
+                                                    <p class="" style="margin-top: 1rem;">{{ e($car_data['gear_box'] ?? 'N/A') }}</p>
                                                 </div>
                                             </div>
                                         </div>
