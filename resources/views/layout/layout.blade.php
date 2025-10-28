@@ -67,10 +67,10 @@
 
 
 
-<nav class="navbar navbar-expand-lg ps-lg-3 pe-lg-3 pt-0" style="z-index:999; margin-top:0;">
+<nav class="navbar navbar-expand-lg ps-lg-3 pe-lg-3 " style="z-index:999; margin-top:0;">
     <div class="container-fluid d-flex justify-content-between align-items-center" style="z-index: 1000;">
          <a class="navbar-brand fw-bold" href="{{url('/')}}">
-              <img class="logo img-fluid" src="{{asset('assets/logowhite.svg')}}" alt="">
+              <img class="logo img-fluid" src="{{asset('assets/logodark.svg')}}" alt="">
              </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
