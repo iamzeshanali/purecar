@@ -62,36 +62,25 @@
     </style>
 
 </head>
-<body class="border-top">
+<body style="margin:0; padding:0;">
         
 
 
 
-<nav class="navbar navbar-expand-lg mt-lg-2 ps-lg-3 pe-lg-3 pt-0" style="z-index:999;">
+<nav class="navbar navbar-expand-lg ps-lg-3 pe-lg-3 pt-0" style="z-index:999; margin-top:0;">
     <div class="container-fluid d-flex justify-content-between align-items-center" style="z-index: 1000;">
-        <a class="navbar-brand fw-bold d-none d-md-block" href="{{url('/')}}">
-             <img class="logo img-fluid" src="{{asset('assets/logowhite.svg')}}" alt="">
-            </a>
-        <a class="navbar-brand fw-bold d-lg-none" href="{{url('/')}}" style="color: white; font-size: 28px;">
-            <img class="logo img-fluid" src="{{asset('assets/logodark.svg')}}" alt="" style="height: 70px; width: 120px;">
-        </a>
-
-      <button
-                class="btn d-block d-sm-none me-2"  type="button"
-                style="background-color: #FF1717; color: white; font-weight: 1000;"
-                onclick="redirectToPayment()">
-                SELL CAR
-            </button>
-
+         <a class="navbar-brand fw-bold" href="{{url('/')}}">
+              <img class="logo img-fluid" src="{{asset('assets/logowhite.svg')}}" alt="">
+             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                <img class="logo img-fluid" src="{{asset('assets/menu.svg')}}" alt="">
             </button>
        
         <div class="collapse navbar-collapse d-lg-flex gap-lg-4 mobile-menu" id="navbarSupportedContent">
-            <ul class="navbar-nav mb-2 mb-lg-0 d-lg-flex gap-lg-2 align-items-lg-center justify-content-lg-center w-100">
+            <ul class="navbar-nav mb-2 mb-lg-0 d-lg-flex gap-lg-4 align-items-lg-center justify-content-lg-center w-100">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url('/')}}">
+                    <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="{{url('/')}}">
                         <i class="fas fa-home d-lg-none me-2"></i>Home
                     </a>
                 </li>
@@ -102,7 +91,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-none d-lg-block" href="{{route('forum.index')}}">Forum</a>
+                    <a class="nav-link d-none d-lg-block {{ request()->routeIs('forum.index') ? 'active' : '' }}" href="{{route('forum.index')}}">Forum</a>
                     <div class="mobile-dropdown d-lg-none">
                         <a class="nav-link d-flex align-items-center justify-content-between" href="#" role="button" onclick="window.location.href='{{route('forum.index')}}'">
                             <div onclick="window.location.href='{{route('forum.index')}}'">
@@ -133,27 +122,27 @@
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{route('event.index')}}">
+                    <a class="nav-link {{ request()->routeIs('event.index') ? 'active' : '' }}" href="{{route('event.index')}}">
                         <i class="fas fa-calendar d-lg-none me-2"></i>Events
                     </a>
                 </li>
                  <li class="nav-item">
-                    <a class="nav-link" href="{{route('business.index')}}">
+                    <a class="nav-link {{ request()->routeIs('business.index') ? 'active' : '' }}" href="{{route('business.index')}}">
                         <i class="fas fa-bag-shopping d-lg-none me-2"></i>Businesses
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{route('blog.index')}}">
+                    <a class="nav-link {{ request()->routeIs('blog.index') ? 'active' : '' }}" href="{{route('blog.index')}}">
                         <i class="fas fa-blog d-lg-none me-2"></i>Blogs
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('faqs.index') }}">
+                    <a class="nav-link {{ request()->routeIs('faqs.index') ? 'active' : '' }}" href="{{ route('faqs.index') }}">
                         <i class="fas fa-question-circle d-lg-none me-2"></i>FAQs
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{route('contact_us')}}">
+                    <a class="nav-link {{ request()->routeIs('contact_us') ? 'active' : '' }}" href="{{route('contact_us')}}">
                         <i class="fas fa-envelope d-lg-none me-2"></i>Contact Us
                     </a>
                 </li>
@@ -166,15 +155,19 @@
                 @endif
                 @if (Auth::check())
                 <li class="nav-item d-none d-lg-block">
-                    <a class="nav-link" href="{{route('dashboard')}}">
-                        Dashboard
-                    </a>
+                    <a class="nav-link" href="{{route('dashboard')}}">Dashboard</a>
                 </li>
                 @endif
             </ul>
-            <a href="javascript:void(0);" id="submitListingBtn" style="min-width: 140px;" class="btn bg-dark text-white pt-2 pb-2 d-none d-lg-block" type="submit" onclick="redirectToPage()">
-                Sell Car
-            </a>
+            <div class="d-none d-lg-flex align-items-center gap-2">
+                <a href="{{ Auth::check() ? route('dashboard') : route('login') }}" class="btn btn-light rounded-pill px-4 fw-semibold">
+                    Dashboard
+                </a>
+                <a href="javascript:void(0);" id="submitListingBtn" class="btn-sell d-none d-lg-inline-flex" onclick="redirectToPage()">
+                    <span id="submitListingBtnText" style="white-space: nowrap;">Sell Your Car</span>
+                    <span class="btn-sell-arrow" aria-hidden="true">➔</span>
+                </a>
+            </div>
               @if (Auth::check())
             <a href="javascript:void(0);" id="submitListingBtnMobile" style="width: 100%; margin-top:20px;" class="btn bg-dark text-white pt-2 pb-2 d-lg-none" type="submit" onclick="redirectToPage()">
                 Dashboard
@@ -187,15 +180,47 @@
 <!-- CSS -->
 <style>
     .navbar{
-        background: white;
-        margin-top: 5px !important;
-       
+        background: #000;
+        margin-top: 0 !important;
+    }
+    .btn-sell{
+        background:#fff; color:#000 !important; border-radius:9999px; 
+        padding:0 .5rem 0 1rem; border:2px solid #fff; 
+        display:inline-flex; align-items:center; gap:.5rem; font-weight:600;
+        text-decoration:none;
+    }
+    .btn-sell:hover{ color:#000 !important; opacity:.95; }
+    .btn-sell-arrow{
+        width:32px; height:32px; border-radius:50%; background:#1b1b1b; color:#fff;
+        display:inline-flex; align-items:center; justify-content:center; font-size:1rem;
+        transition:transform .2s ease;
+    }
+    .btn-sell:hover .btn-sell-arrow{ transform: translateX(2px); }
+    .navbar .nav-link{
+        color: #fff !important;
+        font-weight: 500;
+        position: relative;
+        padding: .5rem .75rem;
+    }
+    .navbar .nav-link:hover{ color:#fff !important; opacity:.85; }
+    .navbar .nav-link.active,
+    .navbar .nav-link[aria-current="page"]{
+        color:#fff !important;
+    }
+    /* underline indicator on hover/active */
+    @media (min-width: 992px){
+        .navbar .nav-link::after{
+            content:"";
+            position:absolute; left:.75rem; right:.75rem; bottom:.2rem;
+            height:2px; background:#fff; opacity:0; transform:scaleX(.2);
+            transition:all .2s ease;
+        }
+        .navbar .nav-link:hover::after,
+        .navbar .nav-link.active::after{ opacity:1; transform:scaleX(1); }
     }
 @media (max-width: 991px) {
     .navbar{
-       
         margin-top: 0px !important;
-       
     }
     .dropdown-toggle::after {
         display: none;
@@ -258,12 +283,10 @@
 @media (max-width: 991px) {
     .navbar {
         background-color: #000 !important;
-        /* position: fixed; */
         top: 0 !important;
         left: 0 !important;
         right: 0 !important;
         z-index: 1000 !important;
-        /* height: 61px !important; */
         padding: 0 15px !important;
         padding-left: 0px !important;
        
@@ -309,18 +332,18 @@
 
     .nav-link {
         padding: 0.75rem 1rem;
-        border-bottom: 1px solid #eee;
-        color: #333 !important;
+        border-bottom: 1px solid #222;
+        color: #fff !important;
     }
 
     .nav-link:hover {
-        background-color: #f8f9fa;
+        background-color: #111;
     }
 
     .nav-link i {
         width: 20px;
         text-align: center;
-        color: #333;
+        color: #fff;
     }
 
     #submitListingBtn {
@@ -660,13 +683,13 @@ window.onload = function() {
             document.getElementById("submitListingBtn").innerText = "Admin";
         @else
             // Change the text to 'Dashboard' for normal users
-            document.getElementById("submitListingBtn").innerText = "Sell Car";
+            document.getElementById("submitListingBtnText").innerText = "Sell Your Car";
         @endif
     @endauth
 
     @guest
         // Keep the text as 'Submit Listing' for guests
-        document.getElementById("submitListingBtn").innerText = "Sell Car";
+        document.getElementById("submitListingBtnText").innerText = "Sell Your Car";
     @endguest
 };
 
