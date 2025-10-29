@@ -63,6 +63,83 @@ button[disabled] {
     transform-origin: center;
 }
 
+/* Responsive styles for new filter section */
+@media screen and (max-width: 768px) {
+    .filter-container {
+        padding: 20px !important;
+        border-radius: 20px !important;
+    }
+    
+    .filter-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    .filter-actions {
+        flex-direction: column !important;
+        gap: 16px !important;
+        align-items: stretch !important;
+    }
+    
+    .action-buttons {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    .search-btn {
+        width: 100% !important;
+    }
+    
+    .more-filters-btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    .clear-all-btn {
+        width: 100% !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .filter-container {
+        padding: 16px !important;
+        margin-top: 20px !important;
+    }
+    
+    .filter-dropdown {
+        padding: 12px 14px !important;
+    }
+    
+    .more-filters-btn,
+    .clear-all-btn,
+    .search-btn {
+        padding: 14px 20px !important;
+        font-size: 18px !important;
+    }
+}
+
+/* Hover effects for filter dropdowns */
+.filter-dropdown:hover {
+    border-color: #525866 !important;
+    transition: border-color 0.2s ease;
+}
+
+/* Button hover effects */
+.more-filters-btn:hover {
+    background: #3A3F4A !important;
+    transition: background-color 0.2s ease;
+}
+
+.clear-all-btn:hover {
+    background: #3A3F4A !important;
+    transition: background-color 0.2s ease;
+}
+
+.search-btn:hover {
+    background: #333333 !important;
+    transition: background-color 0.2s ease;
+}
+
 </style>
 <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-------------First_body---------------->
@@ -99,6 +176,203 @@ button[disabled] {
     commentOutDesktopFormOnMobile();
     window.addEventListener('resize', commentOutDesktopFormOnMobile);
 });
+
+// New JavaScript functions for Figma-based filter design
+function openMakeDropdown() {
+    // Create a simple modal or use existing dropdown functionality
+    const makes = @json($search_field['make']);
+    showCustomDropdown('make', makes, 'makeDisplay', 'makeInput');
+}
+
+function openModelDropdown() {
+    const make = document.getElementById('makeInput').value;
+    if (!make) {
+        alert('Please select a make first');
+        return;
+    }
+    
+    // Fetch models based on selected make
+    fetch(`/fetch-models?make=${make}`)
+        .then(response => response.json())
+        .then(data => {
+            showCustomDropdown('model', data.models, 'modelDisplay', 'modelInput');
+        });
+}
+
+function openVariantDropdown() {
+    const make = document.getElementById('makeInput').value;
+    const model = document.getElementById('modelInput').value;
+    
+    if (!make || !model) {
+        alert('Please select a make and model first');
+        return;
+    }
+    
+    // Fetch variants based on selected make and model
+    fetch(`/fetch-variants-home?make=${make}&model=${model}`)
+        .then(response => response.json())
+        .then(data => {
+            showCustomDropdown('variant', data.variants, 'variantDisplay', 'variantInput');
+        });
+}
+
+function openPriceFromDropdown() {
+    const priceRanges = @json($price_counts);
+    showCustomDropdown('pricefrom', priceRanges, 'priceFromDisplay', 'pricefromInput', 'min');
+}
+
+function openPriceToDropdown() {
+    const priceRanges = @json($price_counts);
+    showCustomDropdown('priceto', priceRanges, 'priceToDisplay', 'pricetoInput', 'max');
+}
+
+function openYearFromDropdown() {
+    const yearRanges = @json($year_counts);
+    showCustomDropdown('yearfrom', yearRanges, 'yearFromDisplay', 'yearfromInput', 'year');
+}
+
+function openYearToDropdown() {
+    const yearRanges = @json($year_counts);
+    showCustomDropdown('yearto', yearRanges, 'yearToDisplay', 'yeartoInput', 'year');
+}
+
+function showCustomDropdown(type, options, displayId, inputId, valueField = null) {
+    // Create a simple dropdown modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    const dropdown = document.createElement('div');
+    dropdown.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        max-width: 400px;
+        width: 90%;
+        max-height: 400px;
+        overflow-y: auto;
+        box-shadow: 0px 4px 20px rgba(0,0,0,0.15);
+    `;
+    
+    let html = `<h3 style="margin-bottom: 15px; font-family: Inter; font-weight: 500;">Select ${type.charAt(0).toUpperCase() + type.slice(1)}</h3>`;
+    
+    options.forEach(option => {
+        let value, displayText, count = '';
+        
+        if (type === 'make') {
+            value = option.make;
+            displayText = option.make;
+            count = `(${option.count})`;
+        } else if (type === 'model') {
+            value = option.model;
+            displayText = option.model;
+            count = `(${option.count})`;
+        } else if (type === 'variant') {
+            value = option.variant;
+            displayText = option.variant;
+            count = `(${option.count})`;
+        } else if (type.includes('price')) {
+            value = valueField === 'min' ? option.min : option.max;
+            displayText = `£${Number(value).toLocaleString()}`;
+            count = `(${option.count})`;
+        } else if (type.includes('year')) {
+            value = option.year;
+            displayText = option.year;
+            count = `(${option.count})`;
+        }
+        
+        html += `
+            <div style="padding: 10px; cursor: pointer; border-radius: 8px; margin-bottom: 5px;" 
+                 onmouseover="this.style.backgroundColor='#f5f5f5'" 
+                 onmouseout="this.style.backgroundColor='transparent'"
+                 onclick="selectOption('${value}', '${displayText}', '${displayId}', '${inputId}'); closeDropdown();">
+                ${displayText} ${count}
+            </div>
+        `;
+    });
+    
+    dropdown.innerHTML = html;
+    modal.appendChild(dropdown);
+    
+    modal.onclick = function(e) {
+        if (e.target === modal) {
+            closeDropdown();
+        }
+    };
+    
+    document.body.appendChild(modal);
+    
+    window.closeDropdown = function() {
+        document.body.removeChild(modal);
+    };
+}
+
+function selectOption(value, displayText, displayId, inputId) {
+    document.getElementById(displayId).textContent = displayText;
+    document.getElementById(displayId).style.color = '#0E121B';
+    document.getElementById(inputId).value = value;
+    
+    // Update hidden form inputs
+    const hiddenInputId = 'hidden' + inputId.charAt(0).toUpperCase() + inputId.slice(1);
+    if (document.getElementById(hiddenInputId)) {
+        document.getElementById(hiddenInputId).value = value;
+    }
+    
+    // Clear dependent filters
+    if (inputId === 'makeInput') {
+        clearDependentFilters(['model', 'variant']);
+    } else if (inputId === 'modelInput') {
+        clearDependentFilters(['variant']);
+    }
+}
+
+function clearDependentFilters(fields) {
+    fields.forEach(field => {
+        const displayId = field + 'Display';
+        const inputId = field + 'Input';
+        const hiddenInputId = 'hidden' + field.charAt(0).toUpperCase() + field.slice(1) + 'Input';
+        
+        document.getElementById(displayId).textContent = 'Select ' + field.charAt(0).toUpperCase() + field.slice(1);
+        document.getElementById(displayId).style.color = '#99A0AE';
+        document.getElementById(inputId).value = '';
+        
+        if (document.getElementById(hiddenInputId)) {
+            document.getElementById(hiddenInputId).value = '';
+        }
+    });
+}
+
+// Update the search button click handler
+document.addEventListener('DOMContentLoaded', function() {
+    const searchBtn = document.querySelector('.search-btn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Copy values to hidden form
+            document.getElementById('hiddenMakeInput').value = document.getElementById('makeInput').value;
+            document.getElementById('hiddenModelInput').value = document.getElementById('modelInput').value;
+            document.getElementById('hiddenVariantInput').value = document.getElementById('variantInput').value;
+            document.getElementById('hiddenPriceFromInput').value = document.getElementById('pricefromInput').value;
+            document.getElementById('hiddenPriceToInput').value = document.getElementById('pricetoInput').value;
+            document.getElementById('hiddenYearFromInput').value = document.getElementById('yearfromInput').value;
+            document.getElementById('hiddenYearToInput').value = document.getElementById('yeartoInput').value;
+            
+            // Submit the hidden form
+            document.getElementById('hiddenForm').submit();
+        });
+    }
+});
 </script>
 
     <div class="hero-section-desktop">
@@ -110,202 +384,129 @@ button[disabled] {
         </div>
         <div class="desktop-hero-section-text">
             <div class="desktop-hero-section-innerbox">
-                <h1>{{ $sections->where('section', 'hero')[1]->value }}</h1>
+                <!-- <h1>{{ $sections->where('section', 'hero')[1]->value }}</h1> -->
                 <!-- <p>{{ $sections->where('section', 'hero')[2]->value }}</p> -->
-                <form method="GET" action="{{route('search_car')}}" style="margin-top:30px; pointer-events: auto;" id="desktopform">
-                    @csrf
-                        <div class="">
-                            <!-- make model row  -->
-                            <div class="search_box_dropdown_menu">
-                                <!-- Make Dropdown -->
-                                <div class="dropdown_menu_first_col">
-                                    <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                        <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                                type="button" id="makeDropdown" data-bs-toggle="dropdown" >
-                                            Make
-                                        </button>
-                                        <ul class="dropdown-menu scrollable-dropdown">
-                                            <!-- <li>
-                                                <a class="dropdown-item" href="javascript:void(0)"
-                                                onclick="updateDropdownText('Any', 'makeDropdown', 'makeInput')">
-                                                    Any
-                                                </a>
-                                            </li> -->
-                                            @foreach($search_field['make'] as $make)
-                                                <li>
-                                                    <a class="dropdown-item" href="javascript:void(0)"
-                                                    onclick="updateDropdownText('{{ $make->make }}', 'makeDropdown', 'makeInput')">
-                                                        {{ $make->make }}&nbsp;&nbsp;&nbsp;&nbsp;({{ $make->count }})
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <input type="hidden" name="make" id="makeInput" value="">
-                                </div>
-                                <!-- Model Dropdown -->
-                                <div class="dropdown_menu_second_col">
-                                    <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                        <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                                type="button" id="modelDropdown" data-bs-toggle="dropdown" disabled>
-                                            Model
-                                        </button>
-                                        <ul class="dropdown-menu scrollable-dropdown" id="modelList">
-                                            <li>
-                                                <a class="dropdown-item" href="javascript:void(0)"
-                                                onclick="updateDropdownText('Any', 'modelDropdown', 'modelInput')">
-                                                    
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <input type="hidden" name="model" id="modelInput" value="">
-                                </div>
-                            </div>                                                          
-
-                            
-                            <!-- Variant Dropdown -->
-
-                            <div class="mb-2">
-                                <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                    <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                            type="button" id="variantDropdown" data-bs-toggle="dropdown" disabled>
-                                        Variant
-                                    </button>
-                                    <ul class="dropdown-menu scrollable-dropdown" id="variantList">
-                                        <li>
-                                            <a class="dropdown-item" href="javascript:void(0)"
-                                            onclick="updateDropdownText('Any', 'variantDropdown', 'variantInput')">
-                                            
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <input type="hidden" name="variant" id="variantInput" value="">
+                <!-- New Filter Section based on Figma Design -->
+                <div class="filter-container" style="background: #FFFFFF; border-radius: 40px; margin-top: 30px; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03);">
+                    <div class="filter-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <!-- Row 1: Make, Model, Variant -->
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 600; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Make</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openMakeDropdown()">
+                                <span id="makeDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Make</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </div>
-                            
-                            <!-- price to and from row  -->
-                            <div class="search_box_dropdown_menu">
-                                   <!-- Price From Dropdown -->
-                                <div class="dropdown_menu_second_col">
-                                    <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                        <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                                type="button" id="pricefromDropdown" data-bs-toggle="dropdown">
-                                                Price From
-                                        </button>
-                                        <ul class="overflow-auto dropdown-menu" style="max-height: 300px;" id="pricefromDropdownList">
-                                            <!-- <li>
-                                                <a class="dropdown-item" href="javascript:void(0)"
-                                                onclick="updateDropdownText('Any', 'pricefromDropdown', 'pricefromInput', 'Any')">
-                                                    Any
-                                                </a>
-                                            </li> -->
-                                            @foreach($price_counts as $price_range)
-                                                <li>
-                                                    <a class="dropdown-item" href="javascript:void(0)"
-                                                    onclick="updateDropdownText('{{ $price_range['min'] }}', 'pricefromDropdown', 'pricefromInput', '£{{ number_format($price_range['min']) }}')">
-                                                    £{{ number_format($price_range['min']) }}&nbsp;&nbsp;&nbsp;&nbsp;({{ $price_range['count'] }})
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <input type="hidden" name="price_from" id="pricefromInput" value="">
-                                </div>
-                                <!-- Price To Dropdown -->
-                                <div class="dropdown_menu_first_col">
-                                    <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                        <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                                type="button" id="pricetoDropdown" data-bs-toggle="dropdown">
-                                            Price To
-                                        </button>
-                                        <ul class="overflow-auto dropdown-menu" style="max-height: 300px;" id="priceDropdownList">
-                                        <!-- <li>
-                                                <a class="dropdown-item" href="javascript:void(0)"
-                                                onclick="updateDropdownText('Any', 'pricetoDropdown', 'pricetoInput')">
-                                                    Any
-                                                </a>
-                                            </li> -->
-                                            @foreach($price_counts as $price_range)
-                                                <li>
-                                                    <a class="dropdown-item" href="javascript:void(0)"
-                                                    onclick="updateDropdownText('{{ $price_range['max'] }}', 'pricetoDropdown', 'pricetoInput', '£{{ number_format($price_range['max']) }} ({{ $price_range['count'] }})')">
-
-                                                    £{{ number_format($price_range['max']) }}&nbsp;&nbsp;&nbsp;&nbsp;({{ $price_range['count'] }})
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <input type="hidden" name="price_to" id="pricetoInput" value="">
-                                </div>
-                             
-                            </div>
-                            
-                            <div class="search_box_dropdown_menu">
-                                  <!-- Year From Dropdown -->
-                                <div class="dropdown_menu_second_col">
-                                    <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                        <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                                type="button" id="yearfromDropdown" data-bs-toggle="dropdown">
-                                                Year From
-                                        </button>
-                                        <ul class="overflow-auto dropdown-menu" style="max-height: 300px;" id="yearfromDropdownList">
-                                            <!-- <li>
-                                                <a class="dropdown-item" href="javascript:void(0)"
-                                                onclick="updateDropdownText('Any', 'yearfromDropdown', 'yearfromInput', 'Any')">
-                                                    Any
-                                                </a>
-                                            </li> -->
-                                            @foreach($year_counts as $year_range)
-                                                <li>
-                                                    <a class="dropdown-item" href="javascript:void(0)"
-                                                    onclick="updateDropdownText('{{ $year_range['year'] }}', 'yearfromDropdown', 'yearfromInput', '{{ $year_range['year'] }}')">
-                                                    {{ $year_range['year'] }}&nbsp;&nbsp;&nbsp;&nbsp;({{ $year_range['count'] }})
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <input type="hidden" name="year_from" id="yearfromInput" value="">
-                                </div>
-                                <!-- Year To Dropdown -->                        
-                                <div class="dropdown_menu_first_col">
-                                    <div class="pt-1 pb-1 dropdown rounded-3 search_color">
-                                        <button class="btn search_color dropdown-toggle w-100 d-flex justify-content-between align-items-center"
-                                                type="button" id="yeartoDropdown" data-bs-toggle="dropdown">
-                                            Year To
-                                        </button>
-                                        <ul class="overflow-auto dropdown-menu" style="max-height: 300px;" id="yeartoDropdownList">
-                                        <!-- <li>
-                                                <a class="dropdown-item" href="javascript:void(0)"
-                                                onclick="updateDropdownText('Any', 'yeartoDropdown', 'yeartoInput')">
-                                                    Any
-                                                </a>
-                                            </li> -->
-                                            @foreach($year_counts as $year_range)
-                                                <li>
-                                                    <a class="dropdown-item" href="javascript:void(0)"
-                                                    onclick="updateDropdownText('{{ $year_range['year'] }}', 'yeartoDropdown', 'yeartoInput', '{{ $year_range['year'] }}')">
-                                                    {{ $year_range['year'] }}&nbsp;&nbsp;&nbsp;&nbsp;({{ $year_range['count'] }})
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <input type="hidden" name="year_to" id="yeartoInput" value="">
-                                </div>
-                              
-                            </div>
-
-                            
-                            
-                            
-                            <div style="display: flex; flex-direction:column; align-items:center; gap:7px;">
-                                    <button id="searchButton" class="btn btn-dark mt-3" style="width:100%;">Search</button>
-                                    <a onclick="clearFilters()" class="text-center" style="cursor: pointer; color: #007bff; font-weight: bold; text-decoration: none;">Clear All</a>
-                            </div>                                
+                            <input type="hidden" name="make" id="makeInput" value="">
                         </div>
+                        
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 700; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Model</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openModelDropdown()">
+                                <span id="modelDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Model</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="model" id="modelInput" value="">
+                        </div>
+                        
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 600; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Variant</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openVariantDropdown()">
+                                <span id="variantDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Variant</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="variant" id="variantInput" value="">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                        <!-- Row 2: Price From, Price To, Year From, Year To -->
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 600; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Price From</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openPriceFromDropdown()">
+                                <span id="priceFromDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Price From</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="price_from" id="pricefromInput" value="">
+                        </div>
+                        
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 600; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Price To</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openPriceToDropdown()">
+                                <span id="priceToDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Price To</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="price_to" id="pricetoInput" value="">
+                        </div>
+                        
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 600; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Year From</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openYearFromDropdown()">
+                                <span id="yearFromDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Year From</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="year_from" id="yearfromInput" value="">
+                        </div>
+                        
+                        <div class="filter-field">
+                            <label style="font-family: Inter; font-weight: 600; font-size: 17px; line-height: 1.1176470588235294em; color: #0E121B; margin-bottom: 12px; display: block;">Year To</label>
+                            <div class="filter-dropdown" style="background: #F5F6FA; border: 1px solid #EDEDED; border-radius: 12px; padding: 14.5px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0px 1px 2px 0px rgba(10, 13, 20, 0.03); cursor: pointer;" onclick="openYearToDropdown()">
+                                <span id="yearToDisplay" style="font-family: Inter; font-weight: 400; font-size: 16px; line-height: 1.1875em; color: #99A0AE;">Select Year To</span>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M5 7.5L10 12.5L15 7.5" stroke="#6A6A6A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <input type="hidden" name="year_to" id="yeartoInput" value="">
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="filter-actions" style="display: flex; justify-content: space-between; align-items: center; gap: 56px;">
+                        <button type="button" class="more-filters-btn" style="background: #F5F6FA; border: 1px solid #525866; border-radius: 12px; padding: 16px 24px; display: flex; align-items: center; gap: 12px; color: #525866; font-family: Inter; font-weight: 500; font-size: 20px; line-height: 1em;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M7 18L17 18" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M7 12L17 12" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M7 6L17 6" stroke="#525866" stroke-width="1.5" stroke-linecap="round"/>
+                                <circle cx="4" cy="18" r="1" fill="#525866"/>
+                                <circle cx="4" cy="12" r="1" fill="#525866"/>
+                                <circle cx="4" cy="6" r="1" fill="#525866"/>
+                            </svg>
+                            More Filters
+                        </button>
+                        
+                        <div class="action-buttons" style="display: flex; align-items: center; gap: 20px;">
+                            <button type="button" class="clear-all-btn" onclick="clearFilters()" style="background: #F5F6FA;border: 1px solid rgba(82, 88, 102, 0.22); border-radius: 12px; padding: 17px 24px; color: #FB3748; font-family: Inter; font-weight: 500; font-size: 20px; line-height: 1em;">
+                                Clear all
+                            </button>
+                            
+                            <button type="submit" class="search-btn" style="background: #000000; border-radius: 12px; padding: 18px 12px 18px 24px; color: #FFFFFF; font-family: Inter; font-weight: 500; font-size: 20px; line-height: 1em; width: 235px;">
+                                Search cars
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hidden form for submission -->
+                <form method="GET" action="{{route('search_car')}}" style="display: none;" id="hiddenForm">
+                    @csrf
+                    <input type="hidden" name="make" id="hiddenMakeInput" value="">
+                    <input type="hidden" name="model" id="hiddenModelInput" value="">
+                    <input type="hidden" name="variant" id="hiddenVariantInput" value="">
+                    <input type="hidden" name="price_from" id="hiddenPriceFromInput" value="">
+                    <input type="hidden" name="price_to" id="hiddenPriceToInput" value="">
+                    <input type="hidden" name="year_from" id="hiddenYearFromInput" value="">
+                    <input type="hidden" name="year_to" id="hiddenYearToInput" value="">
                 </form>
                 </div>
             </div>
